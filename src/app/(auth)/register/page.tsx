@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-import RegisterForm from "@/components/RegisterForm";
+import RegisterForm from "@/components/authForm/RegisterForm";
 
 const Register = () => {
   return (
