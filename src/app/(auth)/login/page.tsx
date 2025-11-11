@@ -1,11 +1,17 @@
-import React from 'react'
+"use client";
+import React from "react";
 
-function Login() {
+import LoginForm from "@/components/authForm/LoginForm";
+
+const Login = () => {
   return (
     <div>
-      page
+      <h1 className="text-xl font-semibold text-center">Đăng nhập</h1>
+      <div className="flex justify-center">
+        <LoginForm />
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
