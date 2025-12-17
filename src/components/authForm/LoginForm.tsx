@@ -20,9 +20,13 @@ import { Input } from "@/components/ui/input";
 import { LoginBody, LoginBodyType } from "@/schemaValidations/auth.schema";
 import { en } from "zod/locales";
 import envConfig from "@/config";
-import { stat } from "fs";
+import { useAppContext } from "@/app/AppProvider";
+import AuthApiRequests from "@/apiRequests/auth";
+import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
+  const router = useRouter();
+  const { setSessionToken } = useAppContext();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -34,24 +38,11 @@ const LoginForm = () => {
   // 2. Define a submit handler.
   async function onSubmit(values: LoginBodyType) {
     try {
-      const result = await fetch(
-        `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/login`,
-        {
-          body: JSON.stringify(values),
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-        }
-      ).then(async (res) => {
-        const payload = await res.json();
-        const data = { status: res.status, payload };
-        if (!res.ok) {
-          throw data;
-        }
-        return data;
-      });
-      console.log(result);
+      const result = await AuthApiRequests.login(values);
+
+      await AuthApiRequests.auth({ sessionToken: result.payload.data.token });
+      setSessionToken(result.payload.data.token);
+      router.push("/me");
     } catch (error: any) {
       const errors = error.payload.errors as {
         field: string;

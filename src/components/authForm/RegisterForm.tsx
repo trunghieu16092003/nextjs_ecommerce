@@ -1,15 +1,16 @@
 "use client";
 import React from "react";
 
+import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useRouter } from "next/navigation";
+import { useAppContext } from "@/app/AppProvider";
 
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,10 +21,11 @@ import {
   RegisterBody,
   RegisterBodyType,
 } from "@/schemaValidations/auth.schema";
-import { en } from "zod/locales";
-import envConfig from "@/config";
+import AuthApiRequests from "@/apiRequests/auth";
 
 const RegisterForm = () => {
+  const router = useRouter();
+  const { setSessionToken } = useAppContext();
   const form = useForm<RegisterBodyType>({
     resolver: zodResolver(RegisterBody),
     defaultValues: {
@@ -36,17 +38,30 @@ const RegisterForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: RegisterBodyType) {
-    const data = await fetch(
-      `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/register`,
-      {
-        body: JSON.stringify(values),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
+    try {
+      const result = await AuthApiRequests.register(values);
+
+      await AuthApiRequests.auth({ sessionToken: result.payload.data.token });
+      setSessionToken(result.payload.data.token);
+      router.push("/me");
+    } catch (error: any) {
+      const errors = error.payload.errors as {
+        field: string;
+        message: string;
+      }[];
+
+      const status = error.status as number;
+      if (status === 422) {
+        errors.forEach((err) => {
+          form.setError(err.field as keyof LoginBodyType, {
+            type: "server",
+            message: err.message,
+          });
+        });
+      } else {
+        toast.error(error.payload.message || "Đã có lỗi xảy ra");
       }
-    ).then((res) => res.json());
-    console.log(data);
+    }
   }
 
   return (
