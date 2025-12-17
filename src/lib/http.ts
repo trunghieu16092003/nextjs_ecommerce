@@ -26,6 +26,8 @@ class SessionToken {
   }
 }
 
+export const sessionToken = new SessionToken();
+
 const request = async <Response> (method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, options?: CustomOptions | undefined) => {
  
   const body = options?.body ? JSON.stringify(options.body) : undefined
