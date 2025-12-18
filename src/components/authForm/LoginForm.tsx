@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,15 +17,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoginBody, LoginBodyType } from "@/schemaValidations/auth.schema";
-import { en } from "zod/locales";
-import envConfig from "@/config";
-import { useAppContext } from "@/app/AppProvider";
+
 import AuthApiRequests from "@/apiRequests/auth";
 import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
   const router = useRouter();
-  const { setSessionToken } = useAppContext();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -41,7 +37,7 @@ const LoginForm = () => {
       const result = await AuthApiRequests.login(values);
 
       await AuthApiRequests.auth({ sessionToken: result.payload.data.token });
-      setSessionToken(result.payload.data.token);
+
       router.push("/me");
     } catch (error: any) {
       const errors = error.payload.errors as {

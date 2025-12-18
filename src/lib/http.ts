@@ -1,6 +1,7 @@
 import envConfig from "@/config"
+import { LoginResType } from "@/schemaValidations/auth.schema"
 
-type CustomOptions = RequestInit & { baseUrl?: string | undefined }
+type CustomOptions = Omit<RequestInit, 'method'> & { baseUrl?: string | undefined }
 
 class HttpError extends Error {
   status: number
@@ -26,13 +27,14 @@ class SessionToken {
   }
 }
 
-export const sessionToken = new SessionToken();
+export const clientSessionToken = new SessionToken();
 
 const request = async <Response> (method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, options?: CustomOptions | undefined) => {
  
   const body = options?.body ? JSON.stringify(options.body) : undefined
   const baseHeaders = {
     'Content-Type': 'application/json',
+    Authorization: clientSessionToken.value ? `Bearer ${clientSessionToken.value}` : '',
   }
 
   // Nêu không truyên baseURl hoặc baseUrl là undefined thì lấy từ envConfig
@@ -55,7 +57,13 @@ const request = async <Response> (method: 'GET' | 'POST' | 'PUT' | 'DELETE', url
   if (!res.ok) {
     throw new HttpError(data)
   }
- return data
+  if(['/auth/login', '/auth/register'].includes(url) ) {
+      clientSessionToken.value = (payload as LoginResType)?.data?.token;
+  } else if ('/auth/logout'.includes(url)) {
+    clientSessionToken.value = '';
+  }
+
+  return data;
 }
 
 const http = {

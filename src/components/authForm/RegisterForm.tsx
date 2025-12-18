@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useAppContext } from "@/app/AppProvider";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +24,6 @@ import AuthApiRequests from "@/apiRequests/auth";
 
 const RegisterForm = () => {
   const router = useRouter();
-  const { setSessionToken } = useAppContext();
   const form = useForm<RegisterBodyType>({
     resolver: zodResolver(RegisterBody),
     defaultValues: {
@@ -42,7 +40,7 @@ const RegisterForm = () => {
       const result = await AuthApiRequests.register(values);
 
       await AuthApiRequests.auth({ sessionToken: result.payload.data.token });
-      setSessionToken(result.payload.data.token);
+      clientSessionToken.value = result.payload.data.token;
       router.push("/me");
     } catch (error: any) {
       const errors = error.payload.errors as {
