@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { handleErrorApi } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +22,10 @@ import {
   RegisterBodyType,
 } from "@/schemaValidations/auth.schema";
 import AuthApiRequests from "@/apiRequests/auth";
+import { clientSessionToken } from "@/lib/http";
 
 const RegisterForm = () => {
+  const [loading, setLoading] = React.useState(false);
   const router = useRouter();
   const form = useForm<RegisterBodyType>({
     resolver: zodResolver(RegisterBody),
@@ -36,6 +39,8 @@ const RegisterForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: RegisterBodyType) {
+    if (loading) return;
+    setLoading(true);
     try {
       const result = await AuthApiRequests.register(values);
 
@@ -43,22 +48,9 @@ const RegisterForm = () => {
       clientSessionToken.value = result.payload.data.token;
       router.push("/me");
     } catch (error: any) {
-      const errors = error.payload.errors as {
-        field: string;
-        message: string;
-      }[];
-
-      const status = error.status as number;
-      if (status === 422) {
-        errors.forEach((err) => {
-          form.setError(err.field as keyof LoginBodyType, {
-            type: "server",
-            message: err.message,
-          });
-        });
-      } else {
-        toast.error(error.payload.message || "Đã có lỗi xảy ra");
-      }
+      handleErrorApi({ error, setError: form.setError, duration: 5000 });
+    } finally {
+      setLoading(false);
     }
   }
 

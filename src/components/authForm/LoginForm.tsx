@@ -3,7 +3,7 @@ import React from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { set, z } from "zod";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,10 @@ import { LoginBody, LoginBodyType } from "@/schemaValidations/auth.schema";
 
 import AuthApiRequests from "@/apiRequests/auth";
 import { useRouter } from "next/navigation";
+import { handleErrorApi } from "@/lib/utils";
 
 const LoginForm = () => {
+  const [loading, setLoading] = React.useState(false);
   const router = useRouter();
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
@@ -33,6 +35,8 @@ const LoginForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: LoginBodyType) {
+    if (loading) return;
+    setLoading(true);
     try {
       const result = await AuthApiRequests.login(values);
 
@@ -40,22 +44,9 @@ const LoginForm = () => {
 
       router.push("/me");
     } catch (error: any) {
-      const errors = error.payload.errors as {
-        field: string;
-        message: string;
-      }[];
-
-      const status = error.status as number;
-      if (status === 422) {
-        errors.forEach((err) => {
-          form.setError(err.field as keyof LoginBodyType, {
-            type: "server",
-            message: err.message,
-          });
-        });
-      } else {
-        toast.error(error.payload.message || "Đã có lỗi xảy ra");
-      }
+      handleErrorApi({ error, setError: form.setError, duration: 5000 });
+    } finally {
+      setLoading(false);
     }
   }
 
