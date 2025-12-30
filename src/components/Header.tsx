@@ -3,6 +3,7 @@ import React from "react";
 import Link from "next/link";
 
 import { ModeToggle } from "./mode-toggle";
+import Logout from "./Logout";
 const Header = () => {
   return (
     <div>
@@ -12,6 +13,9 @@ const Header = () => {
         </li>
         <li>
           <Link href="/register">Đăng ký</Link>
+        </li>
+        <li>
+          <Logout />
         </li>
       </ul>
       <ModeToggle />
