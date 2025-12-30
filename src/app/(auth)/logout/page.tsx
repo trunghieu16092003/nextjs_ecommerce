@@ -16,5 +16,5 @@ export default function page() {
       });
     }
   }, [sessionToken, router, pathName]);
-  return <div>page</div>;
+  return <div></div>;
 }

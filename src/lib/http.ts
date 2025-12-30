@@ -44,6 +44,7 @@ export class EntityError extends HttpError {
 
 class SessionToken {
   private token = "";
+  private _expiresAt = new Date().toISOString();
   get value() {
     return this.token;
   }
@@ -53,6 +54,17 @@ class SessionToken {
       throw new Error("SessionToken can only be set in a browser environment");
     }
     this.token = token;
+  }
+
+  get expiresAt() {
+    return this._expiresAt;
+  }
+
+  set expiresAt(expiresAt: string) {
+    if(typeof window === "undefined") {
+      throw new Error("SessionToken can only be set in a browser environment");
+    }
+    this._expiresAt = expiresAt;
   }
 }
 
@@ -111,6 +123,7 @@ const request = async <Response>(
           });
           await clientLogoutRequest;
           clientSessionToken.value = "";
+          clientSessionToken.expiresAt = new Date().toISOString();
           clientLogoutRequest = null;
           location.href = "/login";
         }
@@ -131,8 +144,10 @@ const request = async <Response>(
       )
     ) {
       clientSessionToken.value = (payload as LoginResType)?.data?.token;
+      clientSessionToken.expiresAt = (payload as LoginResType)?.data?.expiresAt;
     } else if ("/auth/logout" === normolizePath(url)) {
       clientSessionToken.value = "";
+           clientSessionToken.expiresAt = new Date().toISOString();
     }
   }
 

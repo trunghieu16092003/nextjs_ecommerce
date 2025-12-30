@@ -44,7 +44,10 @@ const RegisterForm = () => {
     try {
       const result = await AuthApiRequests.register(values);
 
-      await AuthApiRequests.auth({ sessionToken: result.payload.data.token });
+      await AuthApiRequests.auth({
+        sessionToken: result.payload.data.token,
+        expiresAt: result.payload.data.expiresAt,
+      });
       clientSessionToken.value = result.payload.data.token;
       router.push("/me");
     } catch (error: any) {
