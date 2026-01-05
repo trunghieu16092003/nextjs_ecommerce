@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoginBody, LoginBodyType } from "@/schemaValidations/auth.schema";
+import { clientSessionToken } from "@/lib/http";
 
 import AuthApiRequests from "@/apiRequests/auth";
 import { useRouter } from "next/navigation";
@@ -42,6 +43,7 @@ const LoginForm = () => {
         sessionToken: result.payload.data.token,
         expiresAt: result.payload.data.expiresAt,
       });
+      clientSessionToken.value = result.payload.data.token;
 
       router.push("/me");
     } catch (error: any) {

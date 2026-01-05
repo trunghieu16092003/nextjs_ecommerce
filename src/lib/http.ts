@@ -76,13 +76,17 @@ const request = async <Response>(
   url: string,
   options?: CustomOptions | undefined
 ) => {
-  const body = options?.body ? JSON.stringify(options.body) : undefined;
-  const baseHeaders = {
+  const body = options?.body ? options.body instanceof FormData ? options.body : JSON.stringify(options.body) : undefined;
+  const baseHeaders =  body instanceof FormData ? {
+    Authorization: clientSessionToken.value
+      ? `Bearer ${clientSessionToken.value}`
+      : "",
+  } : {
     "Content-Type": "application/json",
     Authorization: clientSessionToken.value
       ? `Bearer ${clientSessionToken.value}`
       : "",
-  };
+  }  ;
 
   // Nêu không truyên baseURl hoặc baseUrl là undefined thì lấy từ envConfig
   // Nếu truyền baseUrl thì lấy giá trị truyền vào, truyền vào mà '' thì là gọi api đến next server
@@ -100,13 +104,12 @@ const request = async <Response>(
     headers: {
       ...baseHeaders,
       ...options?.headers,
-    },
+    } as any,
     body,
     method,
   });
   const payload: Response = await res.json();
   const data = { status: res.status, payload };
-  console.log(data);
   if (!res.ok) {
     if (res.status === ENTITY_ERROR_STATUS) {
       throw new EntityError(
@@ -119,7 +122,7 @@ const request = async <Response>(
           clientLogoutRequest = fetch("/api/auth/logout", {
             method: "POST",
             body: JSON.stringify({ force: true }),
-            headers: { ...baseHeaders },
+            headers: { ...baseHeaders } as any,
           });
           await clientLogoutRequest;
           clientSessionToken.value = "";
