@@ -1,5 +1,5 @@
 import React from "react";
-import ProductAddForm from "./ProductAddForm";
+import ProductAddForm from "@/components/product/ProductAddForm";
 
 export default function page() {
   return (

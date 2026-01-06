@@ -1,12 +1,14 @@
 import http from "@/lib/http";
-import { CreateProductBodyType } from "@/schemaValidations/product.schema";
+import { MessageResType } from "@/schemaValidations/common.schema";
+import { CreateProductBodyType, ProductListResType, ProductResType, UpdateProductBodyType } from "@/schemaValidations/product.schema";
 
 const productApiRequests = {
-    get: () => http.get("/products"),
+    getList: () => http.get<ProductListResType>("/products"),
+    getDetail: (id: number) => http.get<ProductResType>(`/products/${id}`),
     uploadImage: (body: FormData) => http.post<{message: string, data: string}>("/media/upload", body),
-    create: (body: CreateProductBodyType) => http.post("/products", body),
-    update: (id: number, body: any) => http.put(`/products/${id}`, body),
-    delete: (id: number) => http.delete(`/products/${id}`),
+    create: (body: CreateProductBodyType) => http.post<ProductResType>("/products", body),
+    update: (id: number, body: UpdateProductBodyType) => http.put<ProductResType>(`/products/${id}`, body),
+    delete: (id: number) => http.delete<MessageResType>(`/products/${id}`),
 };
 
 export default productApiRequests;

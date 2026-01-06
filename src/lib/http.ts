@@ -108,6 +108,7 @@ const request = async <Response>(
     body,
     method,
   });
+
   const payload: Response = await res.json();
   const data = { status: res.status, payload };
   if (!res.ok) {
@@ -159,7 +160,7 @@ const request = async <Response>(
 
 const http = {
   get<Response>(url: string, options?: Omit<CustomOptions, "body">) {
-    return request<Response>("GET", url, options);
+    return request<Response>("GET", url, { ...options, cache: 'no-store' });
   },
   post<Response>(
     url: string,
@@ -177,10 +178,10 @@ const http = {
   },
   delete<Response>(
     url: string,
-    body?: any,
+
     options?: Omit<CustomOptions, "body">
   ) {
-    return request<Response>("DELETE", url, { ...options, body });
+    return request<Response>("DELETE", url, { ...options });
   },
 };
 
