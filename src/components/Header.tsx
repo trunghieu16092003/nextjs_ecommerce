@@ -1,22 +1,10 @@
 import React from "react";
 
 import Link from "next/link";
-import { cookies } from "next/headers";
-
 import { ModeToggle } from "./mode-toggle";
 import Logout from "./Logout";
-import accountApiRequests from "@/apiRequests/account";
-const Header = async () => {
-  const cookieStore = cookies();
-  const sessionToken = cookieStore.get("sessionToken")?.value;
-  let user = null;
-  if (sessionToken) {
-    const data = await accountApiRequests.me(sessionToken);
-    user = data.payload.data;
-  }
-
-  console.log("user", user);
-
+import { AccountResType } from "@/schemaValidations/account.schema";
+const Header = async ({ user }: { user: AccountResType["data"] | null }) => {
   return (
     <div>
       <ul>
