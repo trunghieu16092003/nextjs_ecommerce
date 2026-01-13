@@ -18,6 +18,8 @@ export default function Logout() {
       AuthApiRequests.logoutFromClient(true).then(() => {
         router.push(`/login?redirectFrom=${pathname}`);
       });
+    } finally {
+      router.refresh();
     }
   };
   return (
